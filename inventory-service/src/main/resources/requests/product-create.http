@@ -1,0 +1,30 @@
+POST http://localhost:8082/inventory/product/create
+Content-Type: application/json
+
+{
+    "productName":"iphone 14",
+    "price": 65000,
+    "quantity": 4
+}
+
+###
+
+POST http://localhost:8082/inventory/product/create
+Content-Type: application/json
+
+{
+  "productName":"iphone 13",
+  "price": 55000,
+  "quantity": 8
+}
+
+###
+
+POST http://localhost:8082/inventory/product/create
+Content-Type: application/json
+
+{
+  "productName":"iphone 12",
+  "price": 45000,
+  "quantity": 15
+}
