@@ -1,0 +1,26 @@
+POST http://localhost:8081/orders
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "orderItems": [
+    {
+      "productId": "7fec6f2b-5821-403a-8662-0788274812f9",
+      "quantity": 11,
+      "price": 65000.0
+    },
+    {
+      "productId": "540fd3be-4124-4751-adf5-bca08da28718",
+      "quantity": 1,
+      "price": 55000.0
+    },
+    {
+      "productId": "0baa8a42-9e3b-4b5d-9296-2a98a06ecd3a",
+      "quantity": 1,
+      "price": 45000.0
+    }
+  ],
+  "totalAmount":0
+}
+
+###
