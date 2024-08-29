@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  axonserver:
+    image: axoniq/axonserver
+    container_name: axonserver
+    ports:
+      - "8024:8024"   # HTTP API ve Dashboard için
+      - "8124:8124"   # Axon Framework ile gRPC iletişimi için
