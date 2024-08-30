@@ -1,4 +1,4 @@
-package com.turgaydede.events;
+package com.turgaydede.command.api.events;
 
 import com.turgaydede.enums.OrderStatus;
 import lombok.*;
@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class OrderCancelledEvent {
 
     private String orderId;

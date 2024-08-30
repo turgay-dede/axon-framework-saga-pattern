@@ -1,6 +1,6 @@
 package com.turgaydede.command.api.controller;
 
-import com.turgaydede.command.api.commands.ProductCreateCommand;
+import com.turgaydede.command.ProductCreateCommand;
 import com.turgaydede.command.api.model.ProductCreateRequest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.web.bind.annotation.PostMapping;

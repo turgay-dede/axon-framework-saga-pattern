@@ -8,7 +8,7 @@ import com.turgaydede.command.api.events.OrderCreatedEvent;
 import com.turgaydede.command.api.model.OrderItemDto;
 import com.turgaydede.events.InsufficientStockEvent;
 import com.turgaydede.events.InventoryDeductedEvent;
-import com.turgaydede.events.OrderCancelledEvent;
+import com.turgaydede.command.api.events.OrderCancelledEvent;
 import com.turgaydede.events.StockUpdatedEvent;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

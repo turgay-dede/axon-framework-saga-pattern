@@ -2,7 +2,6 @@ package com.turgaydede.command.api.controller;
 
 import com.turgaydede.command.api.commands.OrderCreateCommand;
 import com.turgaydede.command.api.model.OrderCreateRequest;
-import com.turgaydede.enums.OrderStatus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

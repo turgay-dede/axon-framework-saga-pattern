@@ -1,4 +1,4 @@
-package com.turgaydede.command.api.commands;
+package com.turgaydede.command;
 
 import lombok.*;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
@@ -8,6 +8,7 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class ProductCreateCommand {
 
     @TargetAggregateIdentifier

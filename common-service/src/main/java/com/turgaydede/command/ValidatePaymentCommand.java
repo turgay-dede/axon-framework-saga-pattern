@@ -8,6 +8,7 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class ValidatePaymentCommand {
 
     @TargetAggregateIdentifier

@@ -2,7 +2,7 @@ package com.turgaydede.command.api.aggregate;
 
 import com.turgaydede.command.InventoryCheckCommand;
 import com.turgaydede.command.StockUpdateCommand;
-import com.turgaydede.command.api.commands.ProductCreateCommand;
+import com.turgaydede.command.ProductCreateCommand;
 import com.turgaydede.command.api.events.ProductCreatedEvent;
 import com.turgaydede.events.InsufficientStockEvent;
 import com.turgaydede.events.InventoryDeductedEvent;

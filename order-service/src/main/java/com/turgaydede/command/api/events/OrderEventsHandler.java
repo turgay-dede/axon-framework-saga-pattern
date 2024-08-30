@@ -5,8 +5,6 @@ import com.turgaydede.command.api.data.OrderItem;
 import com.turgaydede.command.api.data.OrderRepository;
 import com.turgaydede.command.api.model.OrderItemDto;
 import com.turgaydede.enums.OrderStatus;
-import com.turgaydede.events.InsufficientStockEvent;
-import com.turgaydede.events.OrderCancelledEvent;
 import com.turgaydede.events.StockUpdatedEvent;
 import org.axonframework.eventhandling.EventHandler;
 import org.springframework.beans.BeanUtils;
