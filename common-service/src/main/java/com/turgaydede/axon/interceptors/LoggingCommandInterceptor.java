@@ -1,4 +1,4 @@
-package com.turgaydede.logger.axon;
+package com.turgaydede.axon.interceptors;
 
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.messaging.InterceptorChain;
