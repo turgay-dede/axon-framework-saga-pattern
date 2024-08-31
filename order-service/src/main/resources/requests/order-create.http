@@ -1,26 +1,58 @@
+### Success
+
 POST http://localhost:8081/orders
 Content-Type: application/json
 
 {
-  "customerId": 1,
+  "userId": "a77d2ab3-fb27-4341-8a97-7cdb85f7f4c1",
+  "cardId": "a4e22f52-a7d6-4226-b237-527570ddb1ec",
   "orderItems": [
     {
-      "productId": "7fec6f2b-5821-403a-8662-0788274812f9",
-      "quantity": 11,
-      "price": 65000.0
-    },
-    {
-      "productId": "540fd3be-4124-4751-adf5-bca08da28718",
-      "quantity": 1,
-      "price": 55000.0
-    },
-    {
-      "productId": "0baa8a42-9e3b-4b5d-9296-2a98a06ecd3a",
-      "quantity": 1,
-      "price": 45000.0
+      "productId": "30f12d34-e4d7-4cc2-aa0d-ca3fca7c07ab",
+      "quantity": 2,
+      "price": 22000.0
     }
   ],
   "totalAmount":0
 }
 
-###
+### Stock Fail Request
+
+POST http://localhost:8081/orders
+Content-Type: application/json
+
+{
+  "userId": "a77d2ab3-fb27-4341-8a97-7cdb85f7f4c1",
+  "cardId": "a4e22f52-a7d6-4226-b237-527570ddb1ec",
+  "orderItems": [
+    {
+      "productId": "30f12d34-e4d7-4cc2-aa0d-ca3fca7c07ab",
+      "quantity": 2,
+      "price": 22000.0
+    },
+    {
+      "productId": "8088c6c8-182e-4417-87cc-ea00ef35b1ec",
+      "quantity": 20,
+      "price": 25000.0
+    }
+  ],
+  "totalAmount":0
+}
+
+### Payment Fail Request
+
+POST http://localhost:8081/orders
+Content-Type: application/json
+
+{
+  "userId": "a77d2ab3-fb27-4341-8a97-7cdb85f7f4c1",
+  "cardId": "a4e22f52-a7d6-4226-b237-527570ddb2ec",
+  "orderItems": [
+    {
+      "productId": "30f12d34-e4d7-4cc2-aa0d-ca3fca7c07ab",
+      "quantity": 2,
+      "price": 22000.0
+    }
+  ],
+  "totalAmount":0
+}
