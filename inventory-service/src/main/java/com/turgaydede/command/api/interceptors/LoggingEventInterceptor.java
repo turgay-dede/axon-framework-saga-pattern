@@ -1,4 +1,4 @@
-package com.turgaydede.axon.interceptors;
+package com.turgaydede.command.api.interceptors;
 
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.messaging.MessageDispatchInterceptor;
