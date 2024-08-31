@@ -21,7 +21,7 @@ public class OrderEntity {
     @Id
     private String orderId;
 
-    private String customerId;
+    private String userId;
 
     @OneToMany(mappedBy = "orderEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;

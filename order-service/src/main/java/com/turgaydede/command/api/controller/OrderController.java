@@ -21,7 +21,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public void createOrder(@RequestBody OrderCreateRequest request) {
+    public String createOrder(@RequestBody OrderCreateRequest request) {
         String orderId = UUID.randomUUID().toString();
 
         CreateOrderCommand command = CreateOrderCommand.builder()
@@ -32,5 +32,7 @@ public class OrderController {
                 .build();
 
         commandGateway.sendAndWait(command);
+
+        return orderId;
     }
 }
