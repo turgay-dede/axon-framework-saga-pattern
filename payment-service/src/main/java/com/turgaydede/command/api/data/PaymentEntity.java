@@ -1,9 +1,7 @@
 package com.turgaydede.command.api.data;
 
 import com.turgaydede.enums.PaymentStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
@@ -20,6 +18,7 @@ public class PaymentEntity {
     @Id
     private String paymentId;
     private String orderId;
+    @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
     private Date timeStamp;
 }

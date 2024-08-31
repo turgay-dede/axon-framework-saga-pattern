@@ -10,7 +10,9 @@ import java.util.List;
 @Getter
 public class OrderCreateRequest {
 
-    private String customerId;
+    private String userId;
+
+    private String cardId;
 
     private List<OrderItemDto> orderItems;
 

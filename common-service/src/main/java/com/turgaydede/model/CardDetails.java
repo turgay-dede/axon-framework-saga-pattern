@@ -1,9 +1,11 @@
 package com.turgaydede.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class CardDetails {
     private String name;

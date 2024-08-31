@@ -11,16 +11,19 @@ import com.turgaydede.events.StockNotAvailableEvent;
 import com.turgaydede.events.InventoryDeductedEvent;
 import com.turgaydede.events.StockUpdatedEvent;
 import com.turgaydede.model.CardDetails;
+import com.turgaydede.queries.GetUserPaymentDetailsQuery;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandCallback;
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.commandhandling.CommandResultMessage;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.SagaLifecycle;
 import org.axonframework.modelling.saga.StartSaga;
+import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,6 +39,9 @@ public class OrderProcessingSaga {
 
     @Autowired
     private transient CommandGateway commandGateway;
+    @Autowired
+    private transient QueryGateway queryGateway;
+
     private String orderId;
     private Map<String, Integer> products = new HashMap<>();
     private int processedProducts = 0;
@@ -55,6 +61,8 @@ public class OrderProcessingSaga {
                     .productId(orderItem.getProductId())
                     .quantity(orderItem.getQuantity())
                     .orderId(event.getOrderId())
+                    .userId(event.getUserId())
+                    .cardId(event.getCardId())
                     .build();
 
 
@@ -77,14 +85,26 @@ public class OrderProcessingSaga {
         processedProducts++;
 
         String paymentId = UUID.randomUUID().toString();
+        CardDetails cardDetails = null;
+        try {
+            GetUserPaymentDetailsQuery getUserPaymentDetailsQuery = GetUserPaymentDetailsQuery.builder()
+                    .userId(event.getUserId())
+                    .cardId(event.getCardId())
+                    .build();
 
-        CardDetails cardDetails = CardDetails.builder()
-                .name("")
-                .cardNumber("1234567812345678")
-                .validUntilMonth(12)
-                .validUntilYear(2025)
-                .cvv(123)
-                .build();
+            cardDetails = queryGateway.query(getUserPaymentDetailsQuery,
+                            ResponseTypes.instanceOf(CardDetails.class)).join();
+        } catch (Exception exception) {
+            log.info("GetUserPaymentDetailsQuery: cardDetails not found exception. " + exception.getMessage());
+            orderCancelCommand();
+        }
+
+
+        if (cardDetails == null) {
+            orderCancelCommand();
+        }
+
+
         if (!isPaymentCompleted) {
             isPaymentCompleted = true;
             ValidatePaymentCommand command = ValidatePaymentCommand.builder()
@@ -104,7 +124,7 @@ public class OrderProcessingSaga {
 
         products.put(event.getProductId(), event.getQuantity());
 
-        checkIfSagaShouldComplete();
+        checkIfSagaShouldComplete(event.getUserId(),event.getCardId());
     }
 
     @SagaEventHandler(associationProperty = "orderId")
@@ -115,7 +135,7 @@ public class OrderProcessingSaga {
 
         products.put(event.getProductId(), 0);
 
-        checkIfSagaShouldComplete();
+        checkIfSagaShouldComplete(event.getUserId(),event.getCardId());
     }
 
     @EndSaga
@@ -125,7 +145,7 @@ public class OrderProcessingSaga {
         SagaLifecycle.end();
     }
 
-    private void checkIfSagaShouldComplete() {
+    private void checkIfSagaShouldComplete(String userId, String cardId) {
         if (processedProducts == products.size()) {
             if (hasInventoryFailure) {
                 orderCancelCommand();
@@ -135,6 +155,8 @@ public class OrderProcessingSaga {
                             .orderId(orderId)
                             .productId(productId)
                             .quantity(quantity)
+                            .userId(userId)
+                            .cardId(cardId)
                             .build();
                     commandGateway.send(command);
                 });

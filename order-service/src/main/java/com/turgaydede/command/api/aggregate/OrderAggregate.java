@@ -30,7 +30,8 @@ public class OrderAggregate {
 
         OrderCreatedEvent event = OrderCreatedEvent.builder()
                 .orderId(command.getOrderId())
-                .customerId(command.getCustomerId())
+                .userId(command.getUserId())
+                .cardId(command.getCardId())
                 .orderItems(command.getOrderItems())
                 .status(OrderStatus.CREATED)
                 .build();

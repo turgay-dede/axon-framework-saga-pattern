@@ -51,6 +51,8 @@ public class InventoryAggregate {
                     .productId(command.getProductId())
                     .orderId(command.getOrderId())
                     .quantity(command.getQuantity())
+                    .userId(command.getUserId())
+                    .cardId(command.getCardId())
                     .build();
 
             AggregateLifecycle.apply(event);
@@ -58,6 +60,8 @@ public class InventoryAggregate {
             StockNotAvailableEvent event = StockNotAvailableEvent.builder()
                     .orderId(command.getOrderId())
                     .productId(command.getProductId())
+                    .userId(command.getUserId())
+                    .cardId(command.getCardId())
                     .build();
             AggregateLifecycle.apply(event);
         }
@@ -80,6 +84,8 @@ public class InventoryAggregate {
                 .orderId(command.getOrderId())
                 .productId(command.getProductId())
                 .quantity(command.getQuantity())
+                .userId(command.getUserId())
+                .cardId(command.getCardId())
                 .build();
 
         AggregateLifecycle.apply(event);

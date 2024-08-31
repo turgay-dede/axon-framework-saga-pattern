@@ -26,7 +26,8 @@ public class OrderController {
 
         CreateOrderCommand command = CreateOrderCommand.builder()
                 .orderId(orderId)
-                .customerId(request.getCustomerId())
+                .userId(request.getUserId())
+                .cardId(request.getCardId())
                 .orderItems(request.getOrderItems())
                 .build();
 

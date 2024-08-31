@@ -12,4 +12,6 @@ public class StockNotAvailableEvent {
 
     private String orderId;
     private String productId;
+    private String userId;
+    private String cardId;
 }

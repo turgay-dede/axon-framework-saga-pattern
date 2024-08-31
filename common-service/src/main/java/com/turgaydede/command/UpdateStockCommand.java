@@ -15,6 +15,8 @@ public class UpdateStockCommand {
     private String productId;
     private int quantity;
     private String orderId;
+    private String userId;
+    private String cardId;
 }
 
 
