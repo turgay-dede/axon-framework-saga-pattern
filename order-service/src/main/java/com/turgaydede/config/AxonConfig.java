@@ -1,7 +1,7 @@
-package com.turgaydede.axon.config;
+package com.turgaydede.config;
 
-import com.turgaydede.axon.interceptors.LoggingCommandInterceptor;
-import com.turgaydede.axon.interceptors.LoggingEventInterceptor;
+import com.turgaydede.command.api.interceptors.LoggingCommandInterceptor;
+import com.turgaydede.command.api.interceptors.LoggingEventInterceptor;
 import jakarta.annotation.PostConstruct;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.eventhandling.EventBus;
