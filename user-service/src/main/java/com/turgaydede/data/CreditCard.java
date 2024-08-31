@@ -27,7 +27,7 @@ public class CreditCard {
 
     private int cvv;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
 

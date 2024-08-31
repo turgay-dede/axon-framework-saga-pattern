@@ -22,10 +22,11 @@ public class UserProjection {
 
     @QueryHandler
     public CardDetails getUserPaymentDetails(GetUserPaymentDetailsQuery query) {
-        UserEntity userEntity = userRepository.findByUserIdAndCardId(query.getUserId(), query.getCardId())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("User not found with userId: %s and cardId: %s " + query.getUserId(), query.getCardId())));
+        UserEntity userEntity = userRepository.findById(query.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("User not found with userId: %s and cardId: %s " + query.getUserId())));
 
         CardDetails cardDetails = userEntity.getCardDetails().stream()
+                .filter(creditCard -> creditCard.getId().equals(query.getCardId()))
                 .map(creditCard -> CardDetails.builder()
                         .name(creditCard.getName())
                         .cardNumber(creditCard.getCardNumber())
