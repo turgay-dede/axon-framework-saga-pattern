@@ -4,14 +4,17 @@ import com.turgaydede.command.InventoryCheckCommand;
 import com.turgaydede.command.StockUpdateCommand;
 import com.turgaydede.command.ValidatePaymentCommand;
 import com.turgaydede.command.api.commands.OrderCancelCommand;
+import com.turgaydede.command.api.events.OrderCancelledEvent;
 import com.turgaydede.command.api.events.OrderCreatedEvent;
 import com.turgaydede.command.api.model.OrderItemDto;
 import com.turgaydede.events.InsufficientStockEvent;
 import com.turgaydede.events.InventoryDeductedEvent;
-import com.turgaydede.command.api.events.OrderCancelledEvent;
 import com.turgaydede.events.StockUpdatedEvent;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.axonframework.commandhandling.CommandCallback;
+import org.axonframework.commandhandling.CommandMessage;
+import org.axonframework.commandhandling.CommandResultMessage;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
@@ -20,6 +23,7 @@ import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -52,7 +56,16 @@ public class OrderProcessingSaga {
                     .build();
 
 
-            commandGateway.sendAndWait(command);
+            commandGateway.send(command, new CommandCallback<InventoryCheckCommand, Object>() {
+                @Override
+                public void onResult(@Nonnull CommandMessage<? extends InventoryCheckCommand> commandMessage, @Nonnull CommandResultMessage<?> commandResultMessage) {
+                    if (commandResultMessage.isExceptional()) {
+                        Throwable exception = commandResultMessage.exceptionResult();
+                        log.error("SagaEventHandler: Error occurred while handling InventoryCheckCommand: {}", exception.getMessage());
+                        orderCancelCommand();
+                    }
+                }
+            });
         }
     }
 
@@ -101,11 +114,7 @@ public class OrderProcessingSaga {
     private void checkIfSagaShouldComplete() {
         if (processedProducts == products.size()) {
             if (hasInventoryFailure) {
-                OrderCancelCommand command = OrderCancelCommand.builder()
-                        .orderId(orderId)
-                        .build();
-
-                commandGateway.send(command);
+                orderCancelCommand();
             } else {
                 products.forEach((productId, quantity) -> {
                     StockUpdateCommand command = StockUpdateCommand.builder()
@@ -118,5 +127,13 @@ public class OrderProcessingSaga {
             }
             SagaLifecycle.end();
         }
+    }
+
+    private void orderCancelCommand() {
+        OrderCancelCommand command = OrderCancelCommand.builder()
+                .orderId(orderId)
+                .build();
+
+        commandGateway.send(command);
     }
 }
