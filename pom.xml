@@ -12,6 +12,7 @@
         <module>order-service</module>
         <module>inventory-service</module>
         <module>common-service</module>
+        <module>payment-service</module>
     </modules>
 
     <properties>

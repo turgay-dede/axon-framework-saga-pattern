@@ -10,6 +10,7 @@ import com.turgaydede.command.api.model.OrderItemDto;
 import com.turgaydede.events.StockNotAvailableEvent;
 import com.turgaydede.events.InventoryDeductedEvent;
 import com.turgaydede.events.StockUpdatedEvent;
+import com.turgaydede.model.CardDetails;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandCallback;
@@ -38,6 +39,7 @@ public class OrderProcessingSaga {
     private String orderId;
     private Map<String, Integer> products = new HashMap<>();
     private int processedProducts = 0;
+    private boolean isPaymentCompleted = false;
     private boolean hasInventoryFailure = false;
 
     @StartSaga
@@ -75,12 +77,24 @@ public class OrderProcessingSaga {
         processedProducts++;
 
         String paymentId = UUID.randomUUID().toString();
-        ValidatePaymentCommand command = ValidatePaymentCommand.builder()
-                .orderId(event.getOrderId())
-                .paymentId(paymentId)
-                .build();
 
-        //commandGateway.sendAndWait(command);
+        CardDetails cardDetails = CardDetails.builder()
+                .name("")
+                .cardNumber("1234567812345678")
+                .validUntilMonth(12)
+                .validUntilYear(2025)
+                .cvv(123)
+                .build();
+        if (!isPaymentCompleted) {
+            isPaymentCompleted = true;
+            ValidatePaymentCommand command = ValidatePaymentCommand.builder()
+                    .orderId(event.getOrderId())
+                    .paymentId(paymentId)
+                    .cardDetails(cardDetails)
+                    .build();
+
+            commandGateway.sendAndWait(command);
+        }
     }
 
     @SagaEventHandler(associationProperty = "orderId")
@@ -125,7 +139,6 @@ public class OrderProcessingSaga {
                     commandGateway.send(command);
                 });
             }
-            SagaLifecycle.end();
         }
     }
 

@@ -1,16 +1,13 @@
 package com.turgaydede.command;
 
-import com.turgaydede.model.CardDetails;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Value;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
-@Data
-@Builder
-public class ValidatePaymentCommand {
+@Value
+public class CancelPaymentCommand {
 
     @TargetAggregateIdentifier
     private String paymentId;
     private String orderId;
-    private CardDetails cardDetails;
+    private String paymentStatus = "CANCELLED";
 }
