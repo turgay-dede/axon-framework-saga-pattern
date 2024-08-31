@@ -1,7 +1,8 @@
-package com.turgaydede.command.api.events;
+package com.turgaydede.command.api.events.handler;
 
 import com.turgaydede.command.api.data.ProductLookupEntity;
 import com.turgaydede.command.api.data.ProductLookupRepository;
+import com.turgaydede.command.api.events.ProductCreatedEvent;
 import com.turgaydede.events.StockUpdatedEvent;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;

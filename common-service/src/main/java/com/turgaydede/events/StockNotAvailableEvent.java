@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class InsufficientStockEvent {
+public class StockNotAvailableEvent {
 
     private String orderId;
     private String productId;

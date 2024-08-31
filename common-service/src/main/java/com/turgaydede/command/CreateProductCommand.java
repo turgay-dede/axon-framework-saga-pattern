@@ -9,12 +9,14 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 @AllArgsConstructor
 @Builder
 @ToString
-public class StockUpdateCommand {
+public class CreateProductCommand {
 
     @TargetAggregateIdentifier
     private String productId;
+
+    private String productName;
+
+    private Double price;
+
     private int quantity;
-    private String orderId;
 }
-
-

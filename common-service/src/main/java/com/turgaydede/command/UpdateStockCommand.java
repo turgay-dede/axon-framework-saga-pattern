@@ -9,7 +9,7 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 @AllArgsConstructor
 @Builder
 @ToString
-public class InventoryCheckCommand {
+public class UpdateStockCommand {
 
     @TargetAggregateIdentifier
     private String productId;

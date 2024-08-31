@@ -1,7 +1,8 @@
-package com.turgaydede.command.api.events;
+package com.turgaydede.command.api.events.handler;
 
 import com.turgaydede.command.api.data.ProductEntity;
 import com.turgaydede.command.api.data.ProductRepository;
+import com.turgaydede.command.api.events.ProductCreatedEvent;
 import com.turgaydede.events.StockUpdatedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;

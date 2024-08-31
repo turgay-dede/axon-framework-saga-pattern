@@ -1,10 +1,10 @@
 package com.turgaydede.command.api.aggregate;
 
-import com.turgaydede.command.InventoryCheckCommand;
-import com.turgaydede.command.StockUpdateCommand;
-import com.turgaydede.command.ProductCreateCommand;
+import com.turgaydede.command.CheckInventoryCommand;
+import com.turgaydede.command.UpdateStockCommand;
+import com.turgaydede.command.CreateProductCommand;
 import com.turgaydede.command.api.events.ProductCreatedEvent;
-import com.turgaydede.events.InsufficientStockEvent;
+import com.turgaydede.events.StockNotAvailableEvent;
 import com.turgaydede.events.InventoryDeductedEvent;
 import com.turgaydede.events.StockUpdatedEvent;
 import lombok.NoArgsConstructor;
@@ -25,7 +25,7 @@ public class InventoryAggregate {
 
 
     @CommandHandler
-    public InventoryAggregate(ProductCreateCommand command) {
+    public InventoryAggregate(CreateProductCommand command) {
         ProductCreatedEvent event = ProductCreatedEvent.builder()
                 .productId(command.getProductId())
                 .productName(command.getProductName())
@@ -43,7 +43,7 @@ public class InventoryAggregate {
     }
 
     @CommandHandler
-    public void handle(InventoryCheckCommand command) {
+    public void handle(CheckInventoryCommand command) {
 
         if (this.availableStock >= command.getQuantity()) {
 
@@ -55,7 +55,7 @@ public class InventoryAggregate {
 
             AggregateLifecycle.apply(event);
         } else {
-            InsufficientStockEvent event = InsufficientStockEvent.builder()
+            StockNotAvailableEvent event = StockNotAvailableEvent.builder()
                     .orderId(command.getOrderId())
                     .productId(command.getProductId())
                     .build();
@@ -64,7 +64,7 @@ public class InventoryAggregate {
     }
 
     @EventSourcingHandler
-    public void handle(InsufficientStockEvent event) {
+    public void handle(StockNotAvailableEvent event) {
         this.productId = event.getProductId();
     }
 
@@ -75,7 +75,7 @@ public class InventoryAggregate {
     }
 
     @CommandHandler
-    public void handle(StockUpdateCommand command) {
+    public void handle(UpdateStockCommand command) {
         StockUpdatedEvent event = StockUpdatedEvent.builder()
                 .orderId(command.getOrderId())
                 .productId(command.getProductId())

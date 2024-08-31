@@ -1,6 +1,6 @@
 package com.turgaydede.command.api.controller;
 
-import com.turgaydede.command.api.commands.OrderCreateCommand;
+import com.turgaydede.command.api.commands.CreateOrderCommand;
 import com.turgaydede.command.api.model.OrderCreateRequest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +24,7 @@ public class OrderController {
     public void createOrder(@RequestBody OrderCreateRequest request) {
         String orderId = UUID.randomUUID().toString();
 
-        OrderCreateCommand command = OrderCreateCommand.builder()
+        CreateOrderCommand command = CreateOrderCommand.builder()
                 .orderId(orderId)
                 .customerId(request.getCustomerId())
                 .orderItems(request.getOrderItems())

@@ -1,6 +1,6 @@
 package com.turgaydede.command.api.controller;
 
-import com.turgaydede.command.ProductCreateCommand;
+import com.turgaydede.command.CreateProductCommand;
 import com.turgaydede.command.api.model.ProductCreateRequest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +25,7 @@ public class InventoryController {
 
         String productId = UUID.randomUUID().toString();
 
-        ProductCreateCommand command = ProductCreateCommand.builder()
+        CreateProductCommand command = CreateProductCommand.builder()
                 .productId(productId)
                 .productName(request.getProductName())
                 .price(request.getPrice())

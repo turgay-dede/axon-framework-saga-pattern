@@ -1,6 +1,6 @@
 package com.turgaydede.command.api.interceptors;
 
-import com.turgaydede.command.ProductCreateCommand;
+import com.turgaydede.command.CreateProductCommand;
 import com.turgaydede.command.api.data.ProductLookupRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandMessage;
@@ -35,7 +35,7 @@ public class LoggingCommandInterceptor implements MessageHandlerInterceptor<Comm
     }
 
     private void checkProductExists(CommandMessage<?> commandMessage) {
-        if (commandMessage.getPayload() instanceof ProductCreateCommand productCreateCommand) {
+        if (commandMessage.getPayload() instanceof CreateProductCommand productCreateCommand) {
 
             boolean productExists = productLookupRepository
                     .findByProductIdOrProductName(productCreateCommand.getProductId(), productCreateCommand.getProductName())

@@ -1,13 +1,13 @@
 package com.turgaydede.saga;
 
-import com.turgaydede.command.InventoryCheckCommand;
-import com.turgaydede.command.StockUpdateCommand;
+import com.turgaydede.command.CheckInventoryCommand;
+import com.turgaydede.command.UpdateStockCommand;
 import com.turgaydede.command.ValidatePaymentCommand;
-import com.turgaydede.command.api.commands.OrderCancelCommand;
+import com.turgaydede.command.api.commands.CancelOrderCommand;
 import com.turgaydede.command.api.events.OrderCancelledEvent;
 import com.turgaydede.command.api.events.OrderCreatedEvent;
 import com.turgaydede.command.api.model.OrderItemDto;
-import com.turgaydede.events.InsufficientStockEvent;
+import com.turgaydede.events.StockNotAvailableEvent;
 import com.turgaydede.events.InventoryDeductedEvent;
 import com.turgaydede.events.StockUpdatedEvent;
 import lombok.NoArgsConstructor;
@@ -49,16 +49,16 @@ public class OrderProcessingSaga {
         for (OrderItemDto orderItem : event.getOrderItems()) {
             products.put(orderItem.getProductId(), orderItem.getQuantity());
 
-            InventoryCheckCommand command = InventoryCheckCommand.builder()
+            CheckInventoryCommand command = CheckInventoryCommand.builder()
                     .productId(orderItem.getProductId())
                     .quantity(orderItem.getQuantity())
                     .orderId(event.getOrderId())
                     .build();
 
 
-            commandGateway.send(command, new CommandCallback<InventoryCheckCommand, Object>() {
+            commandGateway.send(command, new CommandCallback<CheckInventoryCommand, Object>() {
                 @Override
-                public void onResult(@Nonnull CommandMessage<? extends InventoryCheckCommand> commandMessage, @Nonnull CommandResultMessage<?> commandResultMessage) {
+                public void onResult(@Nonnull CommandMessage<? extends CheckInventoryCommand> commandMessage, @Nonnull CommandResultMessage<?> commandResultMessage) {
                     if (commandResultMessage.isExceptional()) {
                         Throwable exception = commandResultMessage.exceptionResult();
                         log.error("SagaEventHandler: Error occurred while handling InventoryCheckCommand: {}", exception.getMessage());
@@ -94,7 +94,7 @@ public class OrderProcessingSaga {
     }
 
     @SagaEventHandler(associationProperty = "orderId")
-    public void handle(InsufficientStockEvent event) {
+    public void handle(StockNotAvailableEvent event) {
         log.info("InsufficientStockEvent in Saga for Order Id : {}", event.getOrderId());
         processedProducts++;
         hasInventoryFailure = true;
@@ -117,7 +117,7 @@ public class OrderProcessingSaga {
                 orderCancelCommand();
             } else {
                 products.forEach((productId, quantity) -> {
-                    StockUpdateCommand command = StockUpdateCommand.builder()
+                    UpdateStockCommand command = UpdateStockCommand.builder()
                             .orderId(orderId)
                             .productId(productId)
                             .quantity(quantity)
@@ -130,7 +130,7 @@ public class OrderProcessingSaga {
     }
 
     private void orderCancelCommand() {
-        OrderCancelCommand command = OrderCancelCommand.builder()
+        CancelOrderCommand command = CancelOrderCommand.builder()
                 .orderId(orderId)
                 .build();
 
