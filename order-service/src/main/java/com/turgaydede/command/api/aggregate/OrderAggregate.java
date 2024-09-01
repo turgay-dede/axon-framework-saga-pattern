@@ -2,7 +2,9 @@ package com.turgaydede.command.api.aggregate;
 
 
 import com.turgaydede.command.api.commands.CancelOrderCommand;
+import com.turgaydede.command.api.commands.CompleteOrderCommand;
 import com.turgaydede.command.api.commands.CreateOrderCommand;
+import com.turgaydede.command.api.events.OrderCompletedEvent;
 import com.turgaydede.enums.OrderStatus;
 import com.turgaydede.command.api.events.OrderCreatedEvent;
 import com.turgaydede.command.api.model.OrderItemDto;
@@ -58,6 +60,22 @@ public class OrderAggregate {
 
     @EventSourcingHandler
     public void handle(OrderCancelledEvent event) {
+        this.orderId = event.getOrderId();
+        this.orderStatus = event.getStatus();
+    }
+
+    @CommandHandler
+    public void on(CompleteOrderCommand command) {
+        OrderCompletedEvent event = OrderCompletedEvent.builder()
+                .orderId(command.getOrderId())
+                .status(OrderStatus.COMPLETED)
+                .build();
+
+        AggregateLifecycle.apply(event);
+    }
+
+    @EventSourcingHandler
+    public void handle(OrderCompletedEvent event) {
         this.orderId = event.getOrderId();
         this.orderStatus = event.getStatus();
     }

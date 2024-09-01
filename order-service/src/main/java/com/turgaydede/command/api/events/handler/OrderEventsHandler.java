@@ -4,6 +4,7 @@ import com.turgaydede.command.api.data.OrderEntity;
 import com.turgaydede.command.api.data.OrderItem;
 import com.turgaydede.command.api.data.OrderRepository;
 import com.turgaydede.command.api.events.OrderCancelledEvent;
+import com.turgaydede.command.api.events.OrderCompletedEvent;
 import com.turgaydede.command.api.events.OrderCreatedEvent;
 import com.turgaydede.command.api.model.OrderItemDto;
 import com.turgaydede.enums.OrderStatus;
@@ -58,7 +59,14 @@ public class OrderEventsHandler {
     @EventHandler
     public void on(OrderCancelledEvent event) {
         OrderEntity entity = orderRepository.findById(event.getOrderId()).get();
-        entity.setStatus(OrderStatus.CANCELLED);
+        entity.setStatus(event.getStatus());
+        orderRepository.save(entity);
+    }
+
+    @EventHandler
+    public void on(OrderCompletedEvent event) {
+        OrderEntity entity = orderRepository.findById(event.getOrderId()).get();
+        entity.setStatus(event.getStatus());
         orderRepository.save(entity);
     }
 }

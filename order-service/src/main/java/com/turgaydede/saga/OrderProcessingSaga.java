@@ -2,9 +2,12 @@ package com.turgaydede.saga;
 
 import com.turgaydede.command.*;
 import com.turgaydede.command.api.commands.CancelOrderCommand;
+import com.turgaydede.command.api.commands.CompleteOrderCommand;
 import com.turgaydede.command.api.events.OrderCancelledEvent;
+import com.turgaydede.command.api.events.OrderCompletedEvent;
 import com.turgaydede.command.api.events.OrderCreatedEvent;
 import com.turgaydede.command.api.model.OrderItemDto;
+import com.turgaydede.enums.OrderStatus;
 import com.turgaydede.events.*;
 import com.turgaydede.model.CardDetails;
 import com.turgaydede.queries.GetUserPaymentDetailsQuery;
@@ -117,8 +120,6 @@ public class OrderProcessingSaga {
                         log.error("SagaEventHandler: Error occurred while handling ValidatePaymentCommand: {}", exception.getMessage());
 
                         cancelProductReservationCommand(event);
-                    } else {
-
                     }
                 }
             });
@@ -160,8 +161,27 @@ public class OrderProcessingSaga {
 
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentProcessedEvent event) {
-        log.info("ProductReservationCancelledEvent in Saga for Order Id : {}", event.getOrderId());
-        orderCancelCommand();
+        log.info("PaymentProcessedEvent in Saga for Order Id : {}", event.getOrderId());
+        createShipOrderCommand(event.getOrderId(), event.getPaymentId());
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(OrderShippedEvent event) {
+        log.info("OrderShippedEvent in Saga for Order Id : {}", event.getOrderId());
+
+        CompleteOrderCommand command = CompleteOrderCommand.builder()
+                .orderId(event.getOrderId())
+                .status(OrderStatus.COMPLETED)
+                .build();
+
+        commandGateway.send(command);
+    }
+
+    @EndSaga
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(OrderCompletedEvent event) {
+        log.info("OrderCompletedEvent in Saga for Order Id : {}", event.getOrderId());
+        SagaLifecycle.end();
     }
 
     @EndSaga
@@ -207,5 +227,47 @@ public class OrderProcessingSaga {
                 .build();
 
         commandGateway.sendAndWait(command);
+    }
+
+
+
+    private void createShipOrderCommand(String orderId, String paymentId) {
+        String shipmentId = UUID.randomUUID().toString();
+
+        ShipOrderCommand command = ShipOrderCommand.builder()
+                .shipmentId(shipmentId)
+                .orderId(orderId)
+                .build();
+
+        commandGateway.send(command, new CommandCallback<ShipOrderCommand, Object>() {
+            @Override
+            public void onResult(@Nonnull CommandMessage<? extends ShipOrderCommand> commandMessage, @Nonnull CommandResultMessage<?> commandResultMessage) {
+                if (commandResultMessage.isExceptional()) {
+                    Throwable exception = commandResultMessage.exceptionResult();
+                    log.error("SagaEventHandler: Error occurred while handling ShipOrderCommand: {}", exception.getMessage());
+
+                    cancelPaymentCommand(paymentId);
+                }
+            }
+        });
+    }
+
+    private void cancelPaymentCommand(String paymentId) {
+        CancelPaymentCommand command = CancelPaymentCommand.builder()
+                .orderId(orderId)
+                .paymentId(paymentId)
+                .status(OrderStatus.FAILED_PAYMENT)
+                .build();
+
+        commandGateway.send(command);
+    }
+
+    private void completeOrderCommand() {
+        CompleteOrderCommand command = CompleteOrderCommand.builder()
+                .orderId(orderId)
+                .status(OrderStatus.COMPLETED)
+                .build();
+
+        commandGateway.send(command);
     }
 }
