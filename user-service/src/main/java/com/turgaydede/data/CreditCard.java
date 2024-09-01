@@ -3,8 +3,6 @@ package com.turgaydede.data;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "credit_cards")
 @Getter
@@ -27,9 +25,6 @@ public class CreditCard {
 
     private int cvv;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
-
+    private String userId;
 
 }

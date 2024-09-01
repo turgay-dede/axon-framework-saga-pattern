@@ -27,8 +27,4 @@ public class UserEntity {
     private String email;
 
     private String password;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<CreditCard> cardDetails;
-
 }

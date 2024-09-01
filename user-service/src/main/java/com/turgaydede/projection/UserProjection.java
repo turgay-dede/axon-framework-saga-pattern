@@ -1,31 +1,31 @@
 package com.turgaydede.projection;
 
-import com.turgaydede.data.UserEntity;
-import com.turgaydede.data.UserRepository;
+import com.turgaydede.data.CreditCard;
+import com.turgaydede.data.CreditCardRepository;
 import com.turgaydede.model.CardDetails;
 import com.turgaydede.queries.GetUserPaymentDetailsQuery;
 import org.axonframework.queryhandling.QueryHandler;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class UserProjection {
-    private final UserRepository userRepository;
+    private final CreditCardRepository creditCardRepository;
 
-    public UserProjection(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserProjection(CreditCardRepository creditCardRepository) {
+        this.creditCardRepository = creditCardRepository;
     }
 
     @QueryHandler
     public CardDetails getUserPaymentDetails(GetUserPaymentDetailsQuery query) {
-        UserEntity userEntity = userRepository.findById(query.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("User not found with userId: %s and cardId: %s " + query.getUserId())));
+        List<CreditCard> creditCards = creditCardRepository.findAllByUserId(query.getUserId());
 
-        CardDetails cardDetails = userEntity.getCardDetails().stream()
+        if (creditCards.isEmpty()) {
+            throw  new IllegalArgumentException("CreditCard not found with userId: %s " + query.getUserId());
+        }
+
+        CardDetails cardDetails = creditCards.stream()
                 .filter(creditCard -> creditCard.getId().equals(query.getCardId()))
                 .map(creditCard -> CardDetails.builder()
                         .name(creditCard.getName())

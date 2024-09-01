@@ -1,6 +1,7 @@
 package com.turgaydede;
 
 import com.turgaydede.data.CreditCard;
+import com.turgaydede.data.CreditCardRepository;
 import com.turgaydede.data.UserEntity;
 import com.turgaydede.data.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ public class UserApplication implements CommandLineRunner {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CreditCardRepository creditCardRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -38,7 +42,7 @@ public class UserApplication implements CommandLineRunner {
                 .validUntilMonth(12)
                 .validUntilYear(2025)
                 .cvv(123)
-                .user(user)
+                .userId("a77d2ab3-fb27-4341-8a97-7cdb85f7f4c1")
                 .build();
 
         CreditCard card2 = CreditCard.builder()
@@ -48,16 +52,12 @@ public class UserApplication implements CommandLineRunner {
                 .validUntilMonth(7)
                 .validUntilYear(2024)
                 .cvv(456)
-                .user(user)
+                .userId("a77d2ab3-fb27-4341-8a97-7cdb85f7f4c1")
                 .build();
-
-        List<CreditCard> cardDetails = List.of(card1, card2);
-
-        user.setCardDetails(cardDetails);
-
 
 
         userRepository.save(user);
+        creditCardRepository.saveAll(List.of(card1,card2));
 
 
     }
