@@ -1,9 +1,11 @@
 package com.turgaydede.command.api.aggregate;
 
+import com.turgaydede.command.CancelProductReservationCommand;
 import com.turgaydede.command.CheckInventoryCommand;
 import com.turgaydede.command.UpdateStockCommand;
 import com.turgaydede.command.CreateProductCommand;
 import com.turgaydede.command.api.events.ProductCreatedEvent;
+import com.turgaydede.events.ProductReservationCancelledEvent;
 import com.turgaydede.events.StockNotAvailableEvent;
 import com.turgaydede.events.InventoryDeductedEvent;
 import com.turgaydede.events.StockUpdatedEvent;
@@ -89,5 +91,23 @@ public class InventoryAggregate {
                 .build();
 
         AggregateLifecycle.apply(event);
+    }
+
+    @CommandHandler
+    public void handle(CancelProductReservationCommand command) {
+        ProductReservationCancelledEvent event = ProductReservationCancelledEvent
+                .builder()
+                .orderId(command.getOrderId())
+                .productId(command.getProductId())
+                .quantity(command.getQuantity())
+                .build();
+
+        AggregateLifecycle.apply(event);
+    }
+
+    @EventSourcingHandler
+    public void handle(ProductReservationCancelledEvent event) {
+        this.productId = event.getProductId();
+        this.availableStock += event.getQuantity();
     }
 }

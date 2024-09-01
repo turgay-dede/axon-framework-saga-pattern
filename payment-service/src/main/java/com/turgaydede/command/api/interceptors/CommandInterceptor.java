@@ -22,7 +22,12 @@ public class CommandInterceptor implements MessageHandlerInterceptor<CommandMess
 
         log.info("Handling command: {}", commandMessage.getPayloadType().getSimpleName());
 
-        checkCreditCard(commandMessage);
+        try {
+            checkCreditCard(commandMessage);
+        } catch (Exception ex) {
+            log.error("Error in command processing: {}", ex.getMessage());
+            throw ex;
+        }
 
         return interceptorChain.proceed();
     }

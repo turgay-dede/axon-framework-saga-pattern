@@ -1,15 +1,11 @@
 package com.turgaydede.saga;
 
-import com.turgaydede.command.CheckInventoryCommand;
-import com.turgaydede.command.UpdateStockCommand;
-import com.turgaydede.command.ValidatePaymentCommand;
+import com.turgaydede.command.*;
 import com.turgaydede.command.api.commands.CancelOrderCommand;
 import com.turgaydede.command.api.events.OrderCancelledEvent;
 import com.turgaydede.command.api.events.OrderCreatedEvent;
 import com.turgaydede.command.api.model.OrderItemDto;
-import com.turgaydede.events.StockNotAvailableEvent;
-import com.turgaydede.events.InventoryDeductedEvent;
-import com.turgaydede.events.StockUpdatedEvent;
+import com.turgaydede.events.*;
 import com.turgaydede.model.CardDetails;
 import com.turgaydede.queries.GetUserPaymentDetailsQuery;
 import lombok.NoArgsConstructor;
@@ -84,7 +80,6 @@ public class OrderProcessingSaga {
         log.info("StockUpdatedEvent in Saga for Order Id : {}", event.getOrderId());
         processedProducts++;
 
-        String paymentId = UUID.randomUUID().toString();
         CardDetails cardDetails = null;
         try {
             GetUserPaymentDetailsQuery getUserPaymentDetailsQuery = GetUserPaymentDetailsQuery.builder()
@@ -104,6 +99,7 @@ public class OrderProcessingSaga {
             orderCancelCommand();
         }
 
+        String paymentId = UUID.randomUUID().toString();
 
         if (!isPaymentCompleted) {
             isPaymentCompleted = true;
@@ -113,7 +109,17 @@ public class OrderProcessingSaga {
                     .cardDetails(cardDetails)
                     .build();
 
-            commandGateway.sendAndWait(command);
+            commandGateway.send(command, new CommandCallback<ValidatePaymentCommand, Object>() {
+                @Override
+                public void onResult(@Nonnull CommandMessage<? extends ValidatePaymentCommand> commandMessage, @Nonnull CommandResultMessage<?> commandResultMessage) {
+                    if (commandResultMessage.isExceptional()) {
+                        Throwable exception = commandResultMessage.exceptionResult();
+                        log.error("SagaEventHandler: Error occurred while handling ValidatePaymentCommand: {}", exception.getMessage());
+
+                        cancelProductReservationCommand(event);
+                    }
+                }
+            });
         }
     }
 
@@ -136,6 +142,18 @@ public class OrderProcessingSaga {
         products.put(event.getProductId(), 0);
 
         checkIfSagaShouldComplete(event.getUserId(),event.getCardId());
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(PaymentCancelledEvent event) {
+        log.info("InsufficientStockEvent in Saga for Order Id : {}", event.getOrderId());
+
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(ProductReservationCancelledEvent event) {
+        log.info("ProductReservationCancelledEvent in Saga for Order Id : {}", event.getOrderId());
+        orderCancelCommand();
     }
 
     @EndSaga
@@ -170,5 +188,16 @@ public class OrderProcessingSaga {
                 .build();
 
         commandGateway.send(command);
+    }
+
+    private void cancelProductReservationCommand(StockUpdatedEvent event) {
+        CancelProductReservationCommand command = CancelProductReservationCommand.builder()
+                .userId(event.getUserId())
+                .orderId(event.getOrderId())
+                .productId(event.getProductId())
+                .quantity(event.getQuantity())
+                .build();
+
+        commandGateway.sendAndWait(command);
     }
 }

@@ -9,10 +9,11 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 @AllArgsConstructor
 @Builder
 @ToString
-public class CancelPaymentCommand {
+public class CancelProductReservationCommand {
 
     @TargetAggregateIdentifier
-    private String paymentId;
+    private String productId;
+    private int quantity;
     private String orderId;
-    private String paymentStatus = "CANCELLED";
+    private String userId;
 }

@@ -3,6 +3,7 @@ package com.turgaydede.command.api.events.handler;
 import com.turgaydede.command.api.data.ProductEntity;
 import com.turgaydede.command.api.data.ProductRepository;
 import com.turgaydede.command.api.events.ProductCreatedEvent;
+import com.turgaydede.events.ProductReservationCancelledEvent;
 import com.turgaydede.events.StockUpdatedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
@@ -53,6 +54,25 @@ public class ProductEventsHandler {
 
         } catch (Exception exception) {
             log.error("StockUpdatedEvent: " + exception.getMessage());
+            throw exception;
+        }
+
+    }
+
+    @Transactional
+    @EventHandler
+    public void on(ProductReservationCancelledEvent event) {
+        ProductEntity entity = productRepository.findById(event.getProductId()).get();
+
+        int newQuantity = entity.getQuantity() + event.getQuantity();
+
+        entity.setQuantity(newQuantity);
+
+        try {
+            productRepository.save(entity);
+
+        } catch (Exception exception) {
+            log.error("ProductReservationCancelledEvent: " + exception.getMessage());
             throw exception;
         }
 
