@@ -117,6 +117,8 @@ public class OrderProcessingSaga {
                         log.error("SagaEventHandler: Error occurred while handling ValidatePaymentCommand: {}", exception.getMessage());
 
                         cancelProductReservationCommand(event);
+                    } else {
+
                     }
                 }
             });
@@ -152,6 +154,12 @@ public class OrderProcessingSaga {
 
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(ProductReservationCancelledEvent event) {
+        log.info("ProductReservationCancelledEvent in Saga for Order Id : {}", event.getOrderId());
+        orderCancelCommand();
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(PaymentProcessedEvent event) {
         log.info("ProductReservationCancelledEvent in Saga for Order Id : {}", event.getOrderId());
         orderCancelCommand();
     }

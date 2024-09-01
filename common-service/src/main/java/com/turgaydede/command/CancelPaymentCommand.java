@@ -1,5 +1,6 @@
 package com.turgaydede.command;
 
+import com.turgaydede.enums.OrderStatus;
 import lombok.*;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
@@ -14,5 +15,5 @@ public class CancelPaymentCommand {
     @TargetAggregateIdentifier
     private String paymentId;
     private String orderId;
-    private String paymentStatus = "CANCELLED";
+    private OrderStatus status;
 }

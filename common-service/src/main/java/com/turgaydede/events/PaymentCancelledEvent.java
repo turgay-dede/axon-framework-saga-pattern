@@ -1,11 +1,11 @@
 package com.turgaydede.events;
 
-import com.turgaydede.enums.PaymentStatus;
+import com.turgaydede.enums.OrderStatus;
 import lombok.Data;
 
 @Data
 public class PaymentCancelledEvent {
     private String paymentId;
     private String orderId;
-    private PaymentStatus paymentStatus;
+    private OrderStatus paymentStatus;
 }

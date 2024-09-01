@@ -2,7 +2,7 @@ package com.turgaydede.command.api.aggregate;
 
 import com.turgaydede.command.CancelPaymentCommand;
 import com.turgaydede.command.ValidatePaymentCommand;
-import com.turgaydede.enums.PaymentStatus;
+import com.turgaydede.enums.OrderStatus;
 import com.turgaydede.events.PaymentCancelledEvent;
 import com.turgaydede.events.PaymentProcessedEvent;
 import lombok.NoArgsConstructor;
@@ -21,7 +21,7 @@ public class PaymentAggregate {
     @AggregateIdentifier
     private String paymentId;
     private String orderId;
-    private PaymentStatus paymentStatus;
+    private OrderStatus status;
 
     @CommandHandler
     public PaymentAggregate(ValidatePaymentCommand validatePaymentCommand) {
@@ -60,7 +60,7 @@ public class PaymentAggregate {
 
     @EventSourcingHandler
     public void on(PaymentCancelledEvent event) {
-        this.paymentStatus = event.getPaymentStatus();
+        this.status = event.getPaymentStatus();
     }
 
 }

@@ -2,7 +2,7 @@ package com.turgaydede.command.api.events.handler;
 
 import com.turgaydede.command.api.data.PaymentEntity;
 import com.turgaydede.command.api.data.PaymentRepository;
-import com.turgaydede.enums.PaymentStatus;
+import com.turgaydede.enums.OrderStatus;
 import com.turgaydede.events.PaymentCancelledEvent;
 import com.turgaydede.events.PaymentProcessedEvent;
 import org.axonframework.eventhandling.EventHandler;
@@ -25,7 +25,7 @@ public class PaymentsEventHandler {
                 = PaymentEntity.builder()
                 .paymentId(event.getPaymentId())
                 .orderId(event.getOrderId())
-                .paymentStatus(PaymentStatus.COMPLETED)
+                .status(OrderStatus.PAYMENT_CONFIRMED)
                 .timeStamp(new Date())
                 .build();
 
@@ -37,7 +37,7 @@ public class PaymentsEventHandler {
         PaymentEntity payment
                 = paymentRepository.findById(event.getPaymentId()).get();
 
-        payment.setPaymentStatus(event.getPaymentStatus());
+        payment.setStatus(event.getPaymentStatus());
 
         paymentRepository.save(payment);
     }

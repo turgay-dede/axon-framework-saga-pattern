@@ -1,6 +1,6 @@
 package com.turgaydede.command.api.data;
 
-import com.turgaydede.enums.PaymentStatus;
+import com.turgaydede.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +19,7 @@ public class PaymentEntity {
     private String paymentId;
     private String orderId;
     @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus;
+    private OrderStatus status;
     private Date timeStamp;
 }
 
