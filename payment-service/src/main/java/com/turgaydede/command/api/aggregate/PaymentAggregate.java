@@ -1,5 +1,6 @@
 package com.turgaydede.command.api.aggregate;
 
+import com.turgaydede.command.CancelPaymentCommand;
 import com.turgaydede.command.ValidatePaymentCommand;
 import com.turgaydede.enums.PaymentStatus;
 import com.turgaydede.events.PaymentCancelledEvent;
@@ -11,6 +12,7 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.springframework.beans.BeanUtils;
 
 @Aggregate
 @NoArgsConstructor
@@ -44,6 +46,21 @@ public class PaymentAggregate {
     public void on(PaymentProcessedEvent event) {
         this.paymentId = event.getPaymentId();
         this.orderId = event.getOrderId();
+    }
+
+    @CommandHandler
+    public void handle(CancelPaymentCommand cancelPaymentCommand) {
+        PaymentCancelledEvent paymentCancelledEvent
+                = new PaymentCancelledEvent();
+        BeanUtils.copyProperties(cancelPaymentCommand,
+                paymentCancelledEvent);
+
+        AggregateLifecycle.apply(paymentCancelledEvent);
+    }
+
+    @EventSourcingHandler
+    public void on(PaymentCancelledEvent event) {
+        this.paymentStatus = event.getPaymentStatus();
     }
 
 }
