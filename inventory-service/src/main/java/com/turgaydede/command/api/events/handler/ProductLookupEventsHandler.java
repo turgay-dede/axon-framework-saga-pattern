@@ -3,7 +3,7 @@ package com.turgaydede.command.api.events.handler;
 import com.turgaydede.command.api.data.ProductLookupEntity;
 import com.turgaydede.command.api.data.ProductLookupRepository;
 import com.turgaydede.command.api.events.ProductCreatedEvent;
-import com.turgaydede.events.StockUpdatedEvent;
+import com.turgaydede.events.ProductReservedEvent;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.springframework.beans.BeanUtils;
@@ -30,7 +30,7 @@ public class ProductLookupEventsHandler {
     }
 
     @EventHandler
-    public void on(StockUpdatedEvent event) {
+    public void on(ProductReservedEvent event) {
         ProductLookupEntity entity = productLookupRepository.findById(event.getProductId()).get();
 
         int newQuantity = entity.getQuantity() - event.getQuantity();

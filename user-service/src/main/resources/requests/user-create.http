@@ -1,0 +1,28 @@
+### Success
+
+POST http://localhost:8084/users
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "cardDetails": [
+    {
+      "name": "John Doe",
+      "cardNumber": "4111111111111111",
+      "validUntilMonth": 12,
+      "validUntilYear": 2025,
+      "cvv": 123
+    },
+    {
+      "name": "John Doe",
+      "cardNumber": "5555555555554444",
+      "validUntilMonth": 7,
+      "validUntilYear": 2024,
+      "cvv": 456
+    }
+  ]
+}

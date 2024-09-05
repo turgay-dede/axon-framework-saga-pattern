@@ -1,6 +1,7 @@
-package com.turgaydede.events;
+package com.turgaydede.command;
 
 import lombok.*;
+import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 @Getter
 @Setter
@@ -8,11 +9,14 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class InventoryDeductedEvent {
+public class ReserveProductCommand {
 
-    private String orderId;
+    @TargetAggregateIdentifier
     private String productId;
     private int quantity;
+    private String orderId;
     private String userId;
     private String cardId;
 }
+
+

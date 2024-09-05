@@ -1,14 +1,11 @@
 package com.turgaydede.command.api.aggregate;
 
 import com.turgaydede.command.CancelProductReservationCommand;
-import com.turgaydede.command.CheckInventoryCommand;
-import com.turgaydede.command.UpdateStockCommand;
 import com.turgaydede.command.CreateProductCommand;
+import com.turgaydede.command.ReserveProductCommand;
 import com.turgaydede.command.api.events.ProductCreatedEvent;
 import com.turgaydede.events.ProductReservationCancelledEvent;
-import com.turgaydede.events.StockNotAvailableEvent;
-import com.turgaydede.events.InventoryDeductedEvent;
-import com.turgaydede.events.StockUpdatedEvent;
+import com.turgaydede.events.ProductReservedEvent;
 import lombok.NoArgsConstructor;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -45,44 +42,13 @@ public class InventoryAggregate {
     }
 
     @CommandHandler
-    public void handle(CheckInventoryCommand command) {
+    public void handle(ReserveProductCommand command) {
 
-        if (this.availableStock >= command.getQuantity()) {
-
-            InventoryDeductedEvent event = InventoryDeductedEvent.builder()
-                    .productId(command.getProductId())
-                    .orderId(command.getOrderId())
-                    .quantity(command.getQuantity())
-                    .userId(command.getUserId())
-                    .cardId(command.getCardId())
-                    .build();
-
-            AggregateLifecycle.apply(event);
-        } else {
-            StockNotAvailableEvent event = StockNotAvailableEvent.builder()
-                    .orderId(command.getOrderId())
-                    .productId(command.getProductId())
-                    .userId(command.getUserId())
-                    .cardId(command.getCardId())
-                    .build();
-            AggregateLifecycle.apply(event);
+        if (this.availableStock < command.getQuantity()) {
+            throw new IllegalStateException("Stok not valid");
         }
-    }
 
-    @EventSourcingHandler
-    public void handle(StockNotAvailableEvent event) {
-        this.productId = event.getProductId();
-    }
-
-    @EventSourcingHandler
-    public void handle(StockUpdatedEvent event) {
-        this.productId = event.getProductId();
-        this.availableStock -= event.getQuantity();
-    }
-
-    @CommandHandler
-    public void handle(UpdateStockCommand command) {
-        StockUpdatedEvent event = StockUpdatedEvent.builder()
+        ProductReservedEvent event = ProductReservedEvent.builder()
                 .orderId(command.getOrderId())
                 .productId(command.getProductId())
                 .quantity(command.getQuantity())
@@ -91,6 +57,12 @@ public class InventoryAggregate {
                 .build();
 
         AggregateLifecycle.apply(event);
+    }
+
+    @EventSourcingHandler
+    public void handle(ProductReservedEvent event) {
+        this.productId = event.getProductId();
+        this.availableStock -= event.getQuantity();
     }
 
     @CommandHandler

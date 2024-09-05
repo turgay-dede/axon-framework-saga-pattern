@@ -8,7 +8,7 @@ import com.turgaydede.command.api.events.OrderCompletedEvent;
 import com.turgaydede.command.api.events.OrderCreatedEvent;
 import com.turgaydede.command.api.model.OrderItemDto;
 import com.turgaydede.enums.OrderStatus;
-import com.turgaydede.events.StockUpdatedEvent;
+import com.turgaydede.events.ProductReservedEvent;
 import org.axonframework.eventhandling.EventHandler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -50,7 +50,7 @@ public class OrderEventsHandler {
     }
 
     @EventHandler
-    public void on(StockUpdatedEvent event) {
+    public void on(ProductReservedEvent event) {
         OrderEntity entity = orderRepository.findById(event.getOrderId()).get();
         entity.setStatus(OrderStatus.CONFIRMED);
         orderRepository.save(entity);

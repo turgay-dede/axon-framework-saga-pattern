@@ -4,7 +4,7 @@ import com.turgaydede.command.api.data.ProductEntity;
 import com.turgaydede.command.api.data.ProductRepository;
 import com.turgaydede.command.api.events.ProductCreatedEvent;
 import com.turgaydede.events.ProductReservationCancelledEvent;
-import com.turgaydede.events.StockUpdatedEvent;
+import com.turgaydede.events.ProductReservedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
@@ -42,7 +42,7 @@ public class ProductEventsHandler {
     }
     @Transactional
     @EventHandler
-    public void on(StockUpdatedEvent event) {
+    public void on(ProductReservedEvent event) {
         ProductEntity entity = productRepository.findById(event.getProductId()).get();
 
         int newQuantity = entity.getQuantity() - event.getQuantity();

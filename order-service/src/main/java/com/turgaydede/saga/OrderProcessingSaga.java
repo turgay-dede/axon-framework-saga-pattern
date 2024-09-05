@@ -56,7 +56,7 @@ public class OrderProcessingSaga {
         for (OrderItemDto orderItem : event.getOrderItems()) {
             products.put(orderItem.getProductId(), orderItem.getQuantity());
 
-            CheckInventoryCommand command = CheckInventoryCommand.builder()
+            ReserveProductCommand command = ReserveProductCommand.builder()
                     .productId(orderItem.getProductId())
                     .quantity(orderItem.getQuantity())
                     .orderId(event.getOrderId())
@@ -65,12 +65,12 @@ public class OrderProcessingSaga {
                     .build();
 
 
-            commandGateway.send(command, new CommandCallback<CheckInventoryCommand, Object>() {
+            commandGateway.send(command, new CommandCallback<ReserveProductCommand, Object>() {
                 @Override
-                public void onResult(@Nonnull CommandMessage<? extends CheckInventoryCommand> commandMessage, @Nonnull CommandResultMessage<?> commandResultMessage) {
+                public void onResult(@Nonnull CommandMessage<? extends ReserveProductCommand> commandMessage, @Nonnull CommandResultMessage<?> commandResultMessage) {
                     if (commandResultMessage.isExceptional()) {
                         Throwable exception = commandResultMessage.exceptionResult();
-                        log.error("SagaEventHandler: Error occurred while handling InventoryCheckCommand: {}", exception.getMessage());
+                        log.error("SagaEventHandler: Error occurred while handling ReserveProductCommand: {}", exception.getMessage());
                         orderCancelCommand();
                     }
                 }
@@ -79,78 +79,57 @@ public class OrderProcessingSaga {
     }
 
     @SagaEventHandler(associationProperty = "orderId")
-    public void handle(StockUpdatedEvent event) {
-        log.info("StockUpdatedEvent in Saga for Order Id : {}", event.getOrderId());
-        processedProducts++;
-
-        CardDetails cardDetails = null;
+    public void handle(ProductReservedEvent event) {
         try {
+            log.info("ProductReservedEvent in Saga for Order Id : {}", event.getOrderId());
+            processedProducts++;
+
+            CardDetails cardDetails = null;
             GetUserPaymentDetailsQuery getUserPaymentDetailsQuery = GetUserPaymentDetailsQuery.builder()
                     .userId(event.getUserId())
                     .cardId(event.getCardId())
                     .build();
 
             cardDetails = queryGateway.query(getUserPaymentDetailsQuery,
-                            ResponseTypes.instanceOf(CardDetails.class)).join();
-        } catch (Exception exception) {
-            log.info("GetUserPaymentDetailsQuery: cardDetails not found exception. " + exception.getMessage());
-            orderCancelCommand();
-        }
+                    ResponseTypes.instanceOf(CardDetails.class)).join();
 
 
-        if (cardDetails == null) {
-            orderCancelCommand();
-        }
+            if (cardDetails == null) {
+                orderCancelCommand();
+            }
 
-        String paymentId = UUID.randomUUID().toString();
+            String paymentId = UUID.randomUUID().toString();
 
-        if (!isPaymentCompleted) {
-            isPaymentCompleted = true;
-            ValidatePaymentCommand command = ValidatePaymentCommand.builder()
-                    .orderId(event.getOrderId())
-                    .paymentId(paymentId)
-                    .cardDetails(cardDetails)
-                    .build();
+            if (!isPaymentCompleted) {
+                isPaymentCompleted = true;
+                ValidatePaymentCommand command = ValidatePaymentCommand.builder()
+                        .orderId(event.getOrderId())
+                        .paymentId(paymentId)
+                        .cardDetails(cardDetails)
+                        .build();
 
-            commandGateway.send(command, new CommandCallback<ValidatePaymentCommand, Object>() {
-                @Override
-                public void onResult(@Nonnull CommandMessage<? extends ValidatePaymentCommand> commandMessage, @Nonnull CommandResultMessage<?> commandResultMessage) {
-                    if (commandResultMessage.isExceptional()) {
-                        Throwable exception = commandResultMessage.exceptionResult();
-                        log.error("SagaEventHandler: Error occurred while handling ValidatePaymentCommand: {}", exception.getMessage());
-
-                        cancelProductReservationCommand(event);
+                commandGateway.send(command, new CommandCallback<ValidatePaymentCommand, Object>() {
+                    @Override
+                    public void onResult(@Nonnull CommandMessage<? extends ValidatePaymentCommand> commandMessage, @Nonnull CommandResultMessage<?> commandResultMessage) {
+                        if (commandResultMessage.isExceptional()) {
+                            Throwable exception = commandResultMessage.exceptionResult();
+                            log.error("SagaEventHandler: Error occurred while handling ValidatePaymentCommand: {}", exception.getMessage());
+                            cancelProductReservationCommand(event);
+                        }
                     }
-                }
-            });
+                });
+            }
+        } catch (Exception exception) {
+            log.error("ProductReservedEvent in Saga for Order Id : {}. Error message: {}", event.getOrderId(), exception.getMessage());
+            cancelProductReservationCommand(event);
         }
-    }
 
-    @SagaEventHandler(associationProperty = "orderId")
-    public void handle(InventoryDeductedEvent event) {
-        log.info("InventoryDeductedEvent in Saga for Order Id : {}", event.getOrderId());
-        processedProducts++;
-
-        products.put(event.getProductId(), event.getQuantity());
-
-        checkIfSagaShouldComplete(event.getUserId(),event.getCardId());
-    }
-
-    @SagaEventHandler(associationProperty = "orderId")
-    public void handle(StockNotAvailableEvent event) {
-        log.info("InsufficientStockEvent in Saga for Order Id : {}", event.getOrderId());
-        processedProducts++;
-        hasInventoryFailure = true;
-
-        products.put(event.getProductId(), 0);
-
-        checkIfSagaShouldComplete(event.getUserId(),event.getCardId());
     }
 
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentCancelledEvent event) {
-        log.info("InsufficientStockEvent in Saga for Order Id : {}", event.getOrderId());
-
+        log.info("PaymentCancelledEvent in Saga for Order Id : {}", event.getOrderId());
+        cancelPaymentCommand(event.getPaymentId());
     }
 
     @SagaEventHandler(associationProperty = "orderId")
@@ -197,7 +176,7 @@ public class OrderProcessingSaga {
                 orderCancelCommand();
             } else {
                 products.forEach((productId, quantity) -> {
-                    UpdateStockCommand command = UpdateStockCommand.builder()
+                    ReserveProductCommand command = ReserveProductCommand.builder()
                             .orderId(orderId)
                             .productId(productId)
                             .quantity(quantity)
@@ -218,7 +197,7 @@ public class OrderProcessingSaga {
         commandGateway.send(command);
     }
 
-    private void cancelProductReservationCommand(StockUpdatedEvent event) {
+    private void cancelProductReservationCommand(ProductReservedEvent event) {
         CancelProductReservationCommand command = CancelProductReservationCommand.builder()
                 .userId(event.getUserId())
                 .orderId(event.getOrderId())
@@ -228,7 +207,6 @@ public class OrderProcessingSaga {
 
         commandGateway.sendAndWait(command);
     }
-
 
 
     private void createShipOrderCommand(String orderId, String paymentId) {

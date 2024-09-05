@@ -8,9 +8,11 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class InventoryCheckedEvent {
+public class ProductReservedEvent {
 
-    private String productId;
-    private int quantity;
     private String orderId;
+    private String productId;
+    private String userId;
+    private String cardId;
+    private int quantity;
 }
