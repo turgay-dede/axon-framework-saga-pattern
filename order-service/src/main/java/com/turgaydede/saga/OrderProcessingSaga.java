@@ -105,6 +105,8 @@ public class OrderProcessingSaga {
                 ValidatePaymentCommand command = ValidatePaymentCommand.builder()
                         .orderId(event.getOrderId())
                         .paymentId(paymentId)
+                        .productId(event.getProductId())
+                        .quantity(event.getQuantity())
                         .cardDetails(cardDetails)
                         .build();
 
@@ -129,7 +131,7 @@ public class OrderProcessingSaga {
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentCancelledEvent event) {
         log.info("PaymentCancelledEvent in Saga for Order Id : {}", event.getOrderId());
-        cancelPaymentCommand(event.getPaymentId());
+        cancelProductReservationCommand(event);
     }
 
     @SagaEventHandler(associationProperty = "orderId")
@@ -141,7 +143,7 @@ public class OrderProcessingSaga {
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentProcessedEvent event) {
         log.info("PaymentProcessedEvent in Saga for Order Id : {}", event.getOrderId());
-        createShipOrderCommand(event.getOrderId(), event.getPaymentId());
+        createShipOrderCommand(event.getOrderId(), event.getPaymentId(),event.getProductId(),event.getQuantity());
     }
 
     @SagaEventHandler(associationProperty = "orderId")
@@ -199,7 +201,16 @@ public class OrderProcessingSaga {
 
     private void cancelProductReservationCommand(ProductReservedEvent event) {
         CancelProductReservationCommand command = CancelProductReservationCommand.builder()
-                .userId(event.getUserId())
+                .orderId(event.getOrderId())
+                .productId(event.getProductId())
+                .quantity(event.getQuantity())
+                .build();
+
+        commandGateway.sendAndWait(command);
+    }
+
+    private void cancelProductReservationCommand(PaymentCancelledEvent event) {
+        CancelProductReservationCommand command = CancelProductReservationCommand.builder()
                 .orderId(event.getOrderId())
                 .productId(event.getProductId())
                 .quantity(event.getQuantity())
@@ -209,7 +220,7 @@ public class OrderProcessingSaga {
     }
 
 
-    private void createShipOrderCommand(String orderId, String paymentId) {
+    private void createShipOrderCommand(String orderId, String paymentId, String productId, int quantity) {
         String shipmentId = UUID.randomUUID().toString();
 
         ShipOrderCommand command = ShipOrderCommand.builder()
@@ -224,17 +235,19 @@ public class OrderProcessingSaga {
                     Throwable exception = commandResultMessage.exceptionResult();
                     log.error("SagaEventHandler: Error occurred while handling ShipOrderCommand: {}", exception.getMessage());
 
-                    cancelPaymentCommand(paymentId);
+                    cancelPaymentCommand(paymentId,productId,quantity);
                 }
             }
         });
     }
 
-    private void cancelPaymentCommand(String paymentId) {
+    private void cancelPaymentCommand(String paymentId, String productId, int quantity) {
         CancelPaymentCommand command = CancelPaymentCommand.builder()
                 .orderId(orderId)
                 .paymentId(paymentId)
                 .status(OrderStatus.FAILED_PAYMENT)
+                .productId(productId)
+                .quantity(quantity)
                 .build();
 
         commandGateway.send(command);

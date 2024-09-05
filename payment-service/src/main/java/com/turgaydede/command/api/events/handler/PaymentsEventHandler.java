@@ -37,7 +37,7 @@ public class PaymentsEventHandler {
         PaymentEntity payment
                 = paymentRepository.findById(event.getPaymentId()).get();
 
-        payment.setStatus(event.getPaymentStatus());
+        payment.setStatus(event.getStatus());
 
         paymentRepository.save(payment);
     }

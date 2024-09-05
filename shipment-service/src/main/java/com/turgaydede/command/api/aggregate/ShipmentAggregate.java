@@ -22,8 +22,6 @@ public class ShipmentAggregate {
 
     @CommandHandler
     public ShipmentAggregate(ShipOrderCommand shipOrderCommand) {
-        //Validate the Command
-        // Publish the Order Shipped event
         OrderShippedEvent orderShippedEvent
                 = OrderShippedEvent
                 .builder()

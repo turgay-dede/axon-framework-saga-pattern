@@ -15,5 +15,4 @@ public class CancelProductReservationCommand {
     private String productId;
     private int quantity;
     private String orderId;
-    private String userId;
 }

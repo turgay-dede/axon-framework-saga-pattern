@@ -15,5 +15,7 @@ public class ValidatePaymentCommand {
     @TargetAggregateIdentifier
     private String paymentId;
     private String orderId;
+    private String productId;
+    private int quantity;
     private CardDetails cardDetails;
 }

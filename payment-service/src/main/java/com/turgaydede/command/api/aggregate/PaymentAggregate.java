@@ -24,20 +24,20 @@ public class PaymentAggregate {
     private OrderStatus status;
 
     @CommandHandler
-    public PaymentAggregate(ValidatePaymentCommand validatePaymentCommand) {
-        //Validate the PaymentEntity Details
-        // Publish the PaymentEntity Processed event
+    public PaymentAggregate(ValidatePaymentCommand command) {
         log.info("Executing ValidatePaymentCommand for " +
                         "Order Id: {} and PaymentEntity Id: {}",
-                validatePaymentCommand.getOrderId(),
-                validatePaymentCommand.getPaymentId());
+                command.getOrderId(),
+                command.getPaymentId());
 
-        PaymentProcessedEvent paymentProcessedEvent
-                = new PaymentProcessedEvent(
-                validatePaymentCommand.getPaymentId(), validatePaymentCommand.getOrderId()
-        );
+        PaymentProcessedEvent event = PaymentProcessedEvent.builder()
+                .paymentId(command.getPaymentId())
+                .orderId(command.getOrderId())
+                .productId(command.getProductId())
+                .quantity(command.getQuantity())
+                .build();
 
-        AggregateLifecycle.apply(paymentProcessedEvent);
+        AggregateLifecycle.apply(event);
 
         log.info("PaymentProcessedEvent Applied");
     }
@@ -60,7 +60,7 @@ public class PaymentAggregate {
 
     @EventSourcingHandler
     public void on(PaymentCancelledEvent event) {
-        this.status = event.getPaymentStatus();
+        this.status = event.getStatus();
     }
 
 }

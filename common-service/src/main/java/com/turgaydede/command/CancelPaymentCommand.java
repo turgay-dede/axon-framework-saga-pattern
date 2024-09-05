@@ -16,4 +16,6 @@ public class CancelPaymentCommand {
     private String paymentId;
     private String orderId;
     private OrderStatus status;
+    private String productId;
+    private int quantity;
 }
